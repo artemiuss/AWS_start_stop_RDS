@@ -8,7 +8,8 @@ case "$1" in
      RDS_STOPPED_INSTANCES=$(aws rds describe-db-instances --query "DBInstances[?DBInstanceStatus=='stopped'].[DBInstanceIdentifier]" --output text | tr '\n' ' ') 
      if [ -n "$RDS_STOPPED_INSTANCES" ]
        then 
-         for i in "${RDS_STOPPED_INSTANCES[@]}"
+         RDS_STOPPED_INSTANCES_ARRAY=(${RDS_STOPPED_INSTANCES})
+         for i in "${RDS_STOPPED_INSTANCES_ARRAY[@]}"
          do
            echo "Starting RDS instance: ${i}"
            AWS_OUTPUT=$(aws rds start-db-instance --db-instance-identifier ${i})
@@ -22,8 +23,9 @@ case "$1" in
      #Get running RDS instances
      RDS_RUNNING_INSTANCES=$(aws rds describe-db-instances --query "DBInstances[?DBInstanceStatus=='available'].[DBInstanceIdentifier]" --output text | tr '\n' ' ') 
      if [ -n "$RDS_RUNNING_INSTANCES" ]
-       then 
-         for i in "${RDS_RUNNING_INSTANCES[@]}"
+       then
+         RDS_RUNNING_INSTANCES_ARRAY=(${RDS_RUNNING_INSTANCES})       
+         for i in "${RDS_RUNNING_INSTANCES_ARRAY[@]}"
          do
            echo "Stopping RDS instance: ${i}"
            AWS_OUTPUT=$(aws rds stop-db-instance --db-instance-identifier ${i})
@@ -38,3 +40,6 @@ case "$1" in
      exit 1
      ;;
 esac
+
+
+
