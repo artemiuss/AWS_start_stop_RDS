@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Usage: AWS_start_stop_RDS.sh {start|stop}
+
+# Define RDS tags if needed
+#RDS_TAGS=("")
+
+case "$1" in
+   start)
+     #Get stopped RDS instances
+     RDS_STOPPED_INSTANCES=$(aws rds describe-db-instances --query "DBInstances[?DBInstanceStatus=='stopped'].[DBInstanceIdentifier]" --output text | tr '\n' ' ') 
+     if [ -n "$RDS_STOPPED_INSTANCES" ]
+       then 
+         echo "Starting RDS instances: ${RDS_STOPPED_INSTANCES}"
+         AWS_OUTPUT=$(aws rds start-db-instance --db-instance-identifier ${RDS_RUNNING_INSTANCES})
+         echo "${AWS_OUTPUT}"
+       else 
+         echo "There are no stopped RDS instances"
+     fi
+     ;;     
+   stop)
+     #Get running RDS instances
+     RDS_RUNNING_INSTANCES=$(aws rds describe-db-instances --query "DBInstances[?DBInstanceStatus=='available'].[DBInstanceIdentifier]" --output text | tr '\n' ' ') 
+     if [ -n "$RDS_RUNNING_INSTANCES" ]
+       then 
+         echo "Stopping RDS instances: ${RDS_RUNNING_INSTANCES}"
+         AWS_OUTPUT=$(aws rds stop-db-instance --db-instance-identifier ${RDS_RUNNING_INSTANCES})
+         echo "${AWS_OUTPUT}"         
+       else
+         echo "There are no running RDS instances"
+     fi
+     ;;
+   *)	 
+     echo "Usage: {start|stop}"
+     exit 1
+     ;;
+esac
